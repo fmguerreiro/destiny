@@ -67,6 +67,7 @@ OPTIONS
   -V, --version              Output version number
   -h, --help                 Output usage information
   -w, --write                Restructure and edit folders and files
+  --keep <file or glob>      Keep matching included files at their original paths (repeatable)
   -S, --avoid-single-file    Flag to indicate if single files in folders should be avoided
   --debug [?output file]     Print debugging info
 ```
@@ -82,6 +83,14 @@ This will actually move files around and fix imports:
 ```
 npx destiny -w "src/**/*.*"
 ```
+
+To organize one feature without moving a Next.js route or a public file imported by that route, select only the feature and keep its public entrypoint:
+
+```
+destiny -w --keep "src/features/data-onboarding/snapshot.tsx" "src/features/data-onboarding/**/*.*"
+```
+
+`--keep` also works in `destiny` configuration as an array of file paths or globs. Files outside the selected paths, including `src/app`, are not moved or rewritten. Destiny does not resolve TypeScript path aliases such as `@/`, so keep any alias-imported files at their existing paths.
 
 ## Documentation
 

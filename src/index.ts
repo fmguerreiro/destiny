@@ -15,6 +15,7 @@ const { argv } = process;
 export type Config = {
   help: boolean;
   include: string[];
+  keep: string[];
   version: boolean;
   write: boolean;
   avoidSingleFile: boolean;
@@ -24,6 +25,7 @@ export type Config = {
 const defaultConfig: Config = {
   help: false,
   include: [],
+  keep: [],
   version: false,
   write: false,
   avoidSingleFile: false,
@@ -47,6 +49,10 @@ const printHelp = (exitCode: number) => {
     {
       flags: ["-w", "--write"],
       description: "Restructure and edit folders and files",
+    },
+    {
+      flags: ["--keep <file or glob>"],
+      description: "Keep matching included files at their original paths",
     },
     {
       flags: ["-S", "--avoid-single-file"],
@@ -86,6 +92,14 @@ const parseArgs = (args: string[]) => {
       case "-S":
       case "--avoid-single-file":
         cliConfig.avoidSingleFile = true;
+        break;
+      case "--keep":
+        if (!args[0] || args[0].startsWith("-")) {
+          logger.error("--keep requires a file path or glob", 1);
+          break;
+        }
+        cliConfig.keep = [...(cliConfig.keep ?? []), args[0]];
+        args.shift();
         break;
       case "--debug":
         cliConfig.debug =
@@ -134,6 +148,7 @@ export const run = async (args: string[]) => {
   logger.debug("config used:", mergedConfig);
 
   mergedConfig.include = mergedConfig.include.map(resolveHomeDir);
+  mergedConfig.keep = mergedConfig.keep.map(resolveHomeDir);
 
   const restructureMap = getRestructureMap(mergedConfig.include);
   const filesToEdit = Object.values(restructureMap).flat();

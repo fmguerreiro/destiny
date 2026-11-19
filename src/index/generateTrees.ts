@@ -1,5 +1,6 @@
 import path from "path";
 import chalk from "chalk";
+import glob from "glob";
 
 import logger from "../shared/logger";
 import printTree from "./generateTrees/printTree";
@@ -15,8 +16,13 @@ const getRootFolder = (parentDir: string) => parentDir.split(path.sep).pop();
 
 export function generateTrees(
   restructureMap: { [key: string]: string[] },
-  { avoidSingleFile }: Config
+  { avoidSingleFile, keep }: Config
 ) {
+  const keptFiles = new Set(
+    keep.flatMap(pattern =>
+      glob.sync(pattern, { nodir: true }).map(file => path.resolve(file))
+    )
+  );
   return Object.entries(restructureMap).reduce<Root[]>(
     (rootOptions, [rootPath, filePaths]) => {
       if (filePaths.length <= 1) return rootOptions;
@@ -32,6 +38,12 @@ export function generateTrees(
         tree = detectLonelyFiles(tree);
       }
 
+      for (const filePath of filePaths) {
+        if (keptFiles.has(path.resolve(filePath))) {
+          const key = path.relative(parentFolder, filePath);
+          if (key in tree) tree[key] = key;
+        }
+      }
       // entryPoints that don't import anything might be unused??
       // @todo let user ignore some of these
       const unusedFiles = entryPoints.filter(
