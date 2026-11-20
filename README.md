@@ -68,6 +68,7 @@ OPTIONS
   -h, --help                 Output usage information
   -w, --write                Restructure and edit folders and files
   --keep <file or glob>      Keep matching included files at their original paths (repeatable)
+  --next-routes              Keep Next.js app and pages files at their original paths
   -S, --avoid-single-file    Flag to indicate if single files in folders should be avoided
   --debug [?output file]     Print debugging info
 ```
@@ -84,13 +85,20 @@ This will actually move files around and fix imports:
 npx destiny -w "src/**/*.*"
 ```
 
-To organize one feature without moving a Next.js route or a public file imported by that route, select only the feature and keep its public entrypoint:
+To restructure a Next.js project without moving its filesystem routes:
 
 ```
-destiny -w --keep "src/features/data-onboarding/snapshot.tsx" "src/features/data-onboarding/**/*.*"
+destiny --next-routes "src/**/*.*"
+destiny --next-routes -w "src/**/*.*"
 ```
 
-`--keep` also works in `destiny` configuration as an array of file paths or globs. Files outside the selected paths, including `src/app`, are not moved or rewritten. Destiny does not resolve TypeScript path aliases such as `@/`, so keep any alias-imported files at their existing paths.
+`--next-routes` pins all included files under project-root `app/`, `pages/`, `src/app/`, and `src/pages/`, including colocated components and metadata. The nearest `package.json` determines the project root. It does not pin files outside those directories: Destiny cannot resolve TypeScript path aliases such as `@/`, so explicitly keep feature entrypoints imported through aliases:
+
+```
+destiny --next-routes -w --keep "src/features/data-onboarding/snapshot.tsx" "src/**/*.*"
+```
+
+`--keep` also works in `destiny` configuration as an array of paths or globs. Files outside the selected paths are not moved or rewritten; select a narrow scope or keep their public imports in place.
 
 ## Documentation
 
