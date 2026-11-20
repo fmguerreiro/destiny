@@ -85,18 +85,19 @@ This will actually move files around and fix imports:
 npx destiny -w "src/**/*.*"
 ```
 
-To restructure a Next.js project without moving its filesystem routes:
+To preview a Next.js project while keeping its filesystem routes:
 
 ```
 destiny --next-routes "src/**/*.*"
-destiny --next-routes -w "src/**/*.*"
 ```
 
-`--next-routes` pins all included files under project-root `app/`, `pages/`, `src/app/`, and `src/pages/`, including colocated components and metadata. The nearest `package.json` determines the project root. It does not pin files outside those directories: Destiny cannot resolve TypeScript path aliases such as `@/`, so explicitly keep feature entrypoints imported through aliases:
+After reviewing the proposal, write only a selected feature:
 
 ```
-destiny --next-routes -w --keep "src/features/data-onboarding/snapshot.tsx" "src/**/*.*"
+destiny --next-routes -w --keep "src/features/data-onboarding/snapshot.tsx" "src/features/data-onboarding/**/*.*"
 ```
+
+`--next-routes` pins all included files under project-root `app/`, `pages/`, `src/app/`, and `src/pages/`, including colocated components and metadata. The nearest `package.json` determines the project root. It does not pin files outside those directories. Destiny cannot resolve TypeScript path aliases such as `@/` or rewrite imports outside the selected paths. Before writing, review the proposal and keep every selected file imported through an alias or from outside the selection at its existing path.
 
 `--keep` also works in `destiny` configuration as an array of paths or globs. Files outside the selected paths are not moved or rewritten; select a narrow scope or keep their public imports in place.
 
